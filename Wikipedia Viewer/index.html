@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Wikipedia Viewer</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+
+<body class="container searchSection">
+	<div class="searchInput">
+		<input id="search"></input>
+		<div class="line"></div>
+	</div>
+	<p id="description"> Click icon to search </p>
+	<button class="btn btn-primary active random">Random</button>
+	<div class="results">
+
+	</div>
+	<script>
+		$(document).ready(function() {
+			$("#search").on("click", function() {
+				$("#search").animate({
+					width: '400px'
+				});
+				$(".line").css("display", "none");
+			});
+
+			$("#search").keypress(function(e) {
+				var key = e.which;
+				if (key == 13) {
+					$(".searchSection").css({
+						"vertical-align": "top",
+						"margin-top": "50px",
+						"display": "block"
+					});
+					$("#description").css("display", "none");
+					$(".random").css("display", "inline");
+					var input = $("#search").val();
+					$.getJSON("https://en.wikipedia.org/w/api.php?action=query&list=search&origin=*&format=json&srsearch=" + input + "&utf8=", function(e) {
+						var html = "";
+						for (var i = 0; i < e.query.search.length; i++) {
+							console.log()
+							html += "<div class='resultBox'><h2><a href='https://en.wikipedia.org/wiki/" + e.query.search[i].title + "'>" + e.query.search[i].title + "</a></h2><p>" + e.query.search[i].snippet + "</p>" + e.query.search[i].timestamp + "</div>";
+						}
+						$(".results").html(html);
+					});
+				}
+			});
+			$(".random").on("click", function() {
+				$.getJSON("https://en.wikipedia.org/w/api.php?action=query&list=random&origin=*&format=json&rnlimit=10", function(a) {
+					var html = "";
+					for (var i = 0; i < a.query.random.length; i++) {
+						html += "<div class='resultBox'><h2><a href='https://en.wikipedia.org/?curid=" + a.query.random[i].id + "'>" + a.query.random[i].title + "</a></h2><p>" + "</p>" + "</div>";
+					}
+					$(".results").html(html);
+				});
+			});
+		});
+	</script>
+</body>
+
+</html>
