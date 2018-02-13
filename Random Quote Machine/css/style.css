@@ -1,0 +1,21 @@
+html {
+
+}
+body {
+  text-align: center;
+}
+.container {
+  max-width: 600px;
+}
+.text-div {
+  display: block;
+}
+.buttons-div {
+  display: block;
+}
+.social {
+  float: left;
+}
+.random {
+  float: right;
+}

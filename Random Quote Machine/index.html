@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Random Quote Machine</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+<body class="container">
+  <h2> Random Quote Machine </h2>
+	<div class="jumbotron quote-div">
+    <div class="text-div quote">
+      <p> Quote </p>
+    </div>
+    <div class="buttons-div">
+      <div class="btn-group social">
+      <button class="btn btn-info btn-md active facebook">Facebook</button>
+      <button class="btn btn-info btn-md active twitter">Twitter</button>
+      </div>
+      <button class="btn btn-primary btn-md active random">Random</button>
+    </div>
+	</div>
+  <script>
+  $(document).ready(function() {
+		var textToShare="";
+			randQuote();
+    $(".random").on("click", function(){
+			randQuote();
+    });
+		$(".facebook").on("click", function(){
+			var textToTweet=$(".quote").text();
+			var fbLink = 'https://www.facebook.com/sharer/sharer.php?u=127.0.0.1&picture=&title=Quote+from+Random+Quote+Machine&quote='+ textToShare +'&description=';
+			window.open(fbLink,'_blank');
+		});
+		$(".twitter").on("click", function(){
+			var textToShare=$(".quote").text();
+			var twtLink = 'http://twitter.com/home?status=' + encodeURIComponent(textToShare);
+			window.open(twtLink,'_blank');
+		});
+  });
+	function randQuote() {
+		var back = ["#1b85b8","#5a5255","#559e83","#ae5a41","#c3cb71"];
+		var rand = back[Math.floor(Math.random() * back.length)];
+		$.getJSON("https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=jsonp&jsonp=?", function(a) {
+			var html = "";
+			html += "<p>" + a.quoteText + "<br>~ " + a.quoteAuthor + "</p>";
+			$(".quote").html(html);
+			$("body").css("background-color", rand);
+		});
+	}
+  </script>
+</body>
+</html>
