@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Twitch JSON API</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+
+<body class="container">
+  <div class="hello">
+    <button class="btn btn-primary login">Connect with Twitch</button>
+    <p class="welcome"></p>
+  </div>
+  <h2> Twitch JSON API </h2>
+  <div class="myAppWrapper">
+    <div class="appBody">
+      <nav class="navbar mainNav">
+        <ul>
+          <li id="allChannels"><a href="#">All</a></li>
+          <li id="onlineChannels"><a href="#">Online</a></li>
+          <li id="offlineChannels"><a href="#">Offline</a></li>
+          <li><input type="text" class="form-control input-sm search" maxlength="64" placeholder="Search"/></li>
+        </ul>
+      </nav>
+      <div class="displaySection">
+      </div>
+    </div>
+  </div>
+  <script>
+    var channelsList = [];
+    var channelsIDList = [];
+    var channelsLogo = [];
+    var channelsStream = [];
+    var channelsName = [];
+    var channelsLiveGame = [];
+    var userName = "";
+    var header = {
+      'Accept': 'application/vnd.twitchtv.v3+json',
+      'Client-ID': '4ckgl17zl775evnzejb5pda68gnpz3',
+      'Authorization': accessControll(),
+    }
+    $(document).ready(function() {
+      $(".login").on("click", function() {
+        var scope = "scope=channel_subscriptions viewing_activity_read user_read"
+        var redirectUrl = "http://localhost&response_type=token&" + scope;
+        var url = "https://api.twitch.tv/kraken/oauth2/authorize?client_id=4ckgl17zl775evnzejb5pda68gnpz3&redirect_uri=" + redirectUrl;
+        window.location.href = url;
+
+      });
+      userInfo();
+      $("#allChannels").on("click", function() {
+        getChannels(userName);
+        displayAllChannals();
+      });
+      $("#onlineChannels").on("click", function() {
+        getChannels(userName);
+        displayOnlyOnline();
+      });
+      $("#offlineChannels").on("click", function() {
+        getChannels(userName);
+        displayOnlyOffline();
+      });
+      $(".search").keypress(function(e){
+        if(e.which == 13) {
+        displaySearch();
+        }
+      });
+    });
+
+    function getChannels(userName) {
+      $.ajax({
+        type: 'GET',
+        //mrfrape dynamicznie
+        url: 'https://api.twitch.tv/kraken/users/' + userName + '/follows/channels',
+        headers: header,
+        success: function(data) {
+          for (var i = 0; i < data.follows.length; i++) {
+            channelsList[i] = data.follows[i].channel.display_name;
+            channelsName[i] = data.follows[i].channel.name;
+            isOnline(data.follows[i].channel.name, i);
+            channelsIDList[i] = data.follows[i].channel._id;
+            channelsLogo[i] = data.follows[i].channel.logo;
+          }
+        }
+      });
+    }
+
+    function isOnline(channelName, i) {
+      $.ajax({
+        type: 'GET',
+        url: 'https://api.twitch.tv/kraken/streams/' + channelName,
+        headers: header,
+        success: function(data) {
+          if (data.stream === null) {
+            channelsStream[i] = false
+          } else {
+            channelsStream[i] = true;
+            channelsLiveGame[i] = data.stream.game;
+          }
+        }
+      });
+    }
+
+    function accessControll() {
+      var dataUrl = location.toString();
+      var accessToken = "OAuth " + dataUrl.slice(dataUrl.search("#access_token") + 14, dataUrl.search("#access_token") + 44);
+      return accessToken;
+    }
+
+    function displayAllChannals() {
+      var html = "";
+      html += "<ul class='channels'>";
+      for (var i = 0; i < channelsList.length; i++) {
+        if (channelsStream[i] === true) {
+          html += "<li><img class='logo' src='" + channelsLogo[i] + "'><h4><a href='https://www.twitch.tv/" + channelsName[i] + "'>" + channelsList[i] + "</a></h4><div id='onlineBool' style='background-color:#7CFC00;'></div><p>" + channelsLiveGame[i] +
+            "</p></li>";
+        } else {
+          html += "<li><img class='logo' src='" + channelsLogo[i] + "'><h4><a href='https://www.twitch.tv/" + channelsName[i] + "'>" + channelsList[i] + "</a></h4><div id='onlineBool' style='background-color:#FF0000;'></div></li>";
+        }
+      }
+      html += "</ul>";
+      $(".displaySection").html(html);
+    }
+
+    function displayOnlyOnline() {
+      var html = "";
+      html += "<ul class='channels'>";
+      for (var i = 0; i < channelsList.length; i++) {
+        if (channelsStream[i] === true) {
+          html += "<li><img class='logo' src='" + channelsLogo[i] + "'><h4><a href='https://www.twitch.tv/" + channelsName[i] + "'>" + channelsList[i] + "</a></h4><div id='onlineBool' style='background-color:#7CFC00;'></div><p>" + channelsLiveGame[i] +
+            "</p></li>";
+        }
+      }
+      html += "</ul>";
+      $(".displaySection").html(html);
+    }
+
+    function displayOnlyOffline() {
+      var html = "";
+      html += "<ul class='channels'>";
+      for (var i = 0; i < channelsList.length; i++) {
+        if (channelsStream[i] === false) {
+          html += "<li><img class='logo' src='" + channelsLogo[i] + "'><h4><a href='https://www.twitch.tv/" + channelsName[i] + "'>" + channelsList[i] + "</a></h4><div id='onlineBool' style='background-color:#FF0000;'></div></li>";
+        }
+      }
+      html += "</ul>";
+      $(".displaySection").html(html);
+    }
+    function displaySearch() {
+      var name = $(".search").val();
+      for (var i = 0 ; i < channelsName.length; i++){
+        if(name === channelsName[i]){
+          var html = "";
+          html += "<ul class='channels'>";
+          if (channelsStream[i] === true) {
+            html += "<li><img class='logo' src='" + channelsLogo[i] + "'><h4><a href='https://www.twitch.tv/" + channelsName[i] + "'>" + channelsList[i] + "</a></h4><div id='onlineBool' style='background-color:#7CFC00;'></div><p>" + channelsLiveGame[i] +
+              "</p></li>";
+          } else {
+            html += "<li><img class='logo' src='" + channelsLogo[i] + "'><h4><a href='https://www.twitch.tv/" + channelsName[i] + "'>" + channelsList[i] + "</a></h4><div id='onlineBool' style='background-color:#FF0000;'></div></li>";
+          }
+        }
+      }
+      html += "</ul>";
+      $(".displaySection").html(html);
+    }
+
+    function userInfo() {
+      $.ajax({
+        type: 'GET',
+        url: 'https://api.twitch.tv/kraken/user',
+        headers: header,
+        success: function(data) {
+          userName = data.name;
+          $(".login").hide();
+          $("p.welcome").text("Hello " + userName);
+          getChannels(userName);
+        }
+
+      });
+    }
+  </script>
+</body>
+
+</html>
