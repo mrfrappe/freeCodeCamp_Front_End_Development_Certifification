@@ -1,0 +1,29 @@
+.
+.main-div {
+	margin-top:50px;
+	text-align: center;
+}
+.main-header {
+	text-align: center;
+}
+.large-photo {
+	height: 130%;
+	background-color: white;
+	padding: 5px;
+}
+.photo-description {
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+.list-of-albums {
+	text-align: left;
+	display:inline-block;
+}
+.quote-section {
+	margin-left: 40px;
+	margin-right: 40px;
+	text-align: left;
+}
+.list-of-albums li span {
+	font-weight: bold;
+}
